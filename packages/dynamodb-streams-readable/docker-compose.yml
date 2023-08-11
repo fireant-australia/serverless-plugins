@@ -1,6 +1,0 @@
-version: "3"
-services:
-  kinesis:
-    image: dlsniper/kinesalite:latest
-    ports:
-      - "4567:4567"
