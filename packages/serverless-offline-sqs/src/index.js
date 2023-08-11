@@ -25,7 +25,6 @@ const defaultOptions = {
   batchSize: 100,
   startingPosition: 'TRIM_HORIZON',
   autoCreate: false,
-
   accountId: '000000000000'
 };
 
@@ -55,6 +54,8 @@ class ServerlessOfflineSQS {
 
     this._mergeOptions();
 
+    this.serverless.cli.log(`Starting offline SQS...`);
+
     const {sqsEvents, lambdas} = this._getEvents();
 
     await this._createLambda(lambdas);
@@ -66,10 +67,6 @@ class ServerlessOfflineSQS {
     }
 
     await Promise.all(eventModules);
-
-    this.serverless.cli.log(
-      `Starting Offline SQS at stage ${this.options.stage} (${this.options.region})`
-    );
   }
 
   ready() {
@@ -83,7 +80,7 @@ class ServerlessOfflineSQS {
 
     signals.map(signal =>
       process.on(signal, async () => {
-        this.serverless.cli.log(`Got ${signal} signal. Offline Halting...`);
+        this.serverless.cli.log(`Got ${signal} signal. Halting offline SQS...`);
 
         await this.end();
       })
@@ -100,7 +97,7 @@ class ServerlessOfflineSQS {
       return;
     }
 
-    this.serverless.cli.log('Halting offline server');
+    this.serverless.cli.log('Halting offline SQS.');
 
     const eventModules = [];
 
@@ -131,10 +128,17 @@ class ServerlessOfflineSQS {
 
     this.sqs = new SQS(this.lambda, resources, this.options);
 
-    await this.sqs.create(events);
+    try {
+      await this.sqs.create(events);
 
-    if (!skipStart) {
-      await this.sqs.start();
+      if (!skipStart) {
+        await this.sqs.start();
+      }
+    } catch (err) {
+      console.log(err);
+      log.warn(
+        'Failed to start offline SQS. This is not necessarily a problem but if you want SQS event handlers to be triggered, you must ensure elasticmq is running.'
+      );
     }
   }
 
