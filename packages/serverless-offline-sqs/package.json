@@ -1,6 +1,6 @@
 {
   "name": "@fireant-australia/serverless-offline-sqs",
-  "version": "7.4.0",
+  "version": "7.4.1",
   "description": "Emulate AWS λ and SQS locally when developing your Serverless project",
   "main": "src",
   "repository": "https://github.com/fireant-australia/serverless-plugins.git",
