@@ -54,8 +54,6 @@ class ServerlessOfflineSQS {
 
     this._mergeOptions();
 
-    this.serverless.cli.log(`Starting offline SQS...`);
-
     const {sqsEvents, lambdas} = this._getEvents();
 
     await this._createLambda(lambdas);
@@ -67,6 +65,8 @@ class ServerlessOfflineSQS {
     }
 
     await Promise.all(eventModules);
+
+    this.serverless.cli.log(`SQS offline started`);
   }
 
   ready() {
@@ -80,8 +80,7 @@ class ServerlessOfflineSQS {
 
     signals.map(signal =>
       process.on(signal, async () => {
-        this.serverless.cli.log(`Got ${signal} signal. Halting offline SQS...`);
-
+        this.serverless.cli.log(`SQS offline got ${signal}`);
         await this.end();
       })
     );
@@ -97,7 +96,7 @@ class ServerlessOfflineSQS {
       return;
     }
 
-    this.serverless.cli.log('Halting offline SQS.');
+    this.serverless.cli.log('Stopping SQS offline');
 
     const eventModules = [];
 
@@ -136,7 +135,7 @@ class ServerlessOfflineSQS {
       }
     } catch (err) {
       log.warn(
-        'Failed to start offline SQS. This is not necessarily a problem but if you want SQS event handlers to be triggered, you must ensure elasticmq is running.'
+        'Failed to start SQS offline. This is not necessarily a problem but if you want SQS event handlers to be triggered, you must ensure elasticmq is running.'
       );
     }
   }

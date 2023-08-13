@@ -125,7 +125,10 @@ class SQS {
         })
       );
 
-      if (!Messages || Messages.length === 0) return messages;
+      if (!Messages || Messages.length === 0) {
+        return messages;
+      }
+
       return getMessages(size - Messages.length, [...messages, ...Messages]);
     };
 
@@ -137,6 +140,7 @@ class SQS {
           const lambdaFunction = this.lambda.get(functionKey);
 
           const event = new SQSEvent(messages, this.region, arn);
+
           lambdaFunction.setEvent(event);
 
           await lambdaFunction.runHandler();
@@ -162,8 +166,9 @@ class SQS {
         }
       }
 
-      this.queue.add(job);
+      await this.queue.add(job);
     };
+
     this.queue.add(job);
   }
 
@@ -178,6 +183,7 @@ class SQS {
   async _createQueue({queueName}, remainingTry = 5) {
     try {
       const properties = this._getResourceProperties(queueName);
+
       await this.client.send(
         new CreateQueueCommand({
           QueueName: queueName,
