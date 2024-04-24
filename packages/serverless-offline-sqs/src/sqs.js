@@ -184,15 +184,22 @@ class SQS {
     try {
       const properties = this._getResourceProperties(queueName);
 
-      await this.client.send(
-        new CreateQueueCommand({
-          QueueName: queueName,
-          Attributes: mapValues(
-            value => (isPlainObject(value) ? JSON.stringify(value) : toString(value)),
-            properties
-          )
-        })
-      );
+      const command = new CreateQueueCommand({
+        QueueName: queueName,
+        Attributes: mapValues(
+          value => (isPlainObject(value) ? JSON.stringify(value) : toString(value)),
+          properties
+        )
+      });
+
+      // If there is a redrive property, create the queue first.
+      if (command.input.Attributes.RedrivePolicy) {
+        const redrivePolicy = JSON.parse(command.input.Attributes.RedrivePolicy);
+        const redriveQueue = extractQueueNameFromARN(redrivePolicy.deadLetterTargetArn);
+        await this._createQueue({queueName: redriveQueue});
+      }
+
+      await this.client.send(command);
     } catch (err) {
       if (remainingTry > 0 && err.name === 'AWS.SimpleQueueService.NonExistentQueue') {
         return this._createQueue({queueName}, remainingTry - 1);

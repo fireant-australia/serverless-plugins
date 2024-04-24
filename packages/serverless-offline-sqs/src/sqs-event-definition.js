@@ -1,9 +1,5 @@
 const {isNil, omit} = require('lodash/fp');
-
-const extractQueueNameFromARN = arn => {
-  const [, , , , , queueName] = arn.split(':');
-  return queueName;
-};
+const extractQueueNameFromARN = require('./utils');
 
 class SQSEventDefinition {
   constructor(rawSqsEventDefinition, region, accountId) {
