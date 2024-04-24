@@ -134,6 +134,7 @@ class ServerlessOfflineSQS {
         await this.sqs.start();
       }
     } catch (err) {
+      // console.error(err);
       log.warn(
         'Failed to start SQS offline. This is not necessarily a problem but if you want SQS event handlers to be triggered, you must ensure elasticmq is running.'
       );

@@ -21,6 +21,7 @@ const log = require('@serverless/utils/log').log;
 const {default: PQueue} = require('p-queue');
 const SQSEventDefinition = require('./sqs-event-definition');
 const SQSEvent = require('./sqs-event');
+const extractQueueNameFromARN = require('./utils');
 
 const delay = timeout =>
   new Promise(resolve => {
